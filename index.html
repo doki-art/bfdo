@@ -467,6 +467,65 @@
 
   .form-submit { margin-top: 4px; }
 
+  /* ── FORM VALIDATION ── */
+  .form-field { position: relative; }
+  .form-error {
+    display: none;
+    font-size: 11px;
+    color: #c0392b;
+    margin-top: 5px;
+    padding-left: 2px;
+  }
+  .form-field.invalid input,
+  .form-field.invalid textarea {
+    border-color: #e74c3c;
+    background: #fff8f8;
+  }
+  .form-field.invalid .form-error { display: block; }
+  .form-field.valid input,
+  .form-field.valid textarea {
+    border-color: #27ae60;
+  }
+  .form-field input:focus, .form-field textarea:focus {
+    border-color: var(--navy);
+  }
+  .form-field.invalid input:focus,
+  .form-field.invalid textarea:focus {
+    border-color: #e74c3c;
+  }
+
+  /* ── TOASTER ── */
+  .toaster {
+    position: fixed;
+    bottom: 32px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--navy);
+    color: white;
+    padding: 14px 24px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    display: flex; align-items: center; gap: 10px;
+    box-shadow: 0 8px 32px rgba(26,39,68,0.25);
+    opacity: 0;
+    transition: opacity .3s ease, transform .3s ease;
+    z-index: 300;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .toaster.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  .toaster-icon {
+    width: 18px; height: 18px;
+    background: #27ae60;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .toaster-icon svg { width: 10px; height: 10px; stroke: white; fill: none; stroke-width: 2.5; }
+
   /* ── FOOTER ── */
   footer {
     background: var(--navy-dark);
@@ -553,7 +612,41 @@
     border: 1px solid var(--border); border-radius: 3px; cursor: pointer;
   }
 
-  /* ── ANIMATIONS ── */
+  /* ── FORM VALIDATION ── */
+  .form-field input.invalid,
+  .form-field textarea.invalid {
+    border-color: #e05252;
+    background: #fff8f8;
+  }
+  .form-error {
+    font-size: 11px; color: #e05252;
+    margin-top: 4px; display: none;
+    letter-spacing: 0.01em;
+  }
+  .form-error.show { display: block; }
+
+  /* ── TOASTER ── */
+  .toaster {
+    position: fixed; bottom: 32px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    z-index: 300;
+    background: var(--navy);
+    color: white;
+    padding: 14px 24px;
+    border-radius: 6px;
+    font-size: 13px; font-weight: 500;
+    display: flex; align-items: center; gap: 10px;
+    box-shadow: 0 8px 32px rgba(26,39,68,0.25);
+    opacity: 0;
+    transition: opacity .3s ease, transform .3s ease;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .toaster.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  .toaster svg { width: 16px; height: 16px; flex-shrink: 0; }
   .fade-in {
     opacity: 0; transform: translateY(20px);
     transition: opacity .6s ease, transform .6s ease;
@@ -605,12 +698,15 @@
     border-bottom: 1px solid var(--border);
     display: block;
   }
-  .mobile-nav a:last-of-type { border-bottom: none; }
   .mobile-nav .mobile-nav-footer {
     display: flex; align-items: center;
     justify-content: space-between;
     margin-top: 16px; padding-top: 16px;
     border-top: 1px solid var(--border);
+    gap: 12px;
+  }
+  .mobile-nav .btn-contact {
+    flex: 1; text-align: center; font-size: 13px;
   }
 
   @media (max-width: 768px) {
@@ -749,7 +845,7 @@
   <a href="#contacts" onclick="closeMobileNav()">Contacts</a>
   <div class="mobile-nav-footer">
     <span class="lang-switcher">EN</span>
-    <a href="#" class="btn-contact" onclick="openModal(); closeMobileNav()">Report a Counterfeit Issue</a>
+    <a href="#" class="btn-contact" onclick="openModal(); closeMobileNav()">Report Issue</a>
   </div>
 </div>
 
@@ -999,24 +1095,27 @@
         </div>
       </div>
       <div class="fade-in">
-        <div class="contact-form">
+        <div class="contact-form" id="contact-form">
           <div class="form-field">
-            <input type="text" placeholder="Name" />
+            <input type="text" id="c-name" placeholder="Name" />
             <span class="req">*</span>
+            <div class="form-error" id="c-name-err">Please enter your name</div>
           </div>
           <div class="form-field">
-            <input type="text" placeholder="Company" />
+            <input type="text" id="c-company" placeholder="Company" />
             <span class="req">*</span>
+            <div class="form-error" id="c-company-err">Please enter your company</div>
           </div>
           <div class="form-field">
-            <input type="email" placeholder="Email" />
+            <input type="email" id="c-email" placeholder="Email" />
             <span class="req">*</span>
+            <div class="form-error" id="c-email-err">Please enter a valid email</div>
           </div>
           <div class="form-field">
-            <textarea placeholder="Message"></textarea>
+            <textarea id="c-message" placeholder="Message"></textarea>
           </div>
           <div class="form-submit">
-            <button class="btn-primary">Send</button>
+            <button class="btn-primary" onclick="submitForm('contact-form', ['c-name','c-company','c-email'])">Send</button>
           </div>
         </div>
       </div>
@@ -1038,27 +1137,38 @@
     <button class="modal-close" onclick="closeModal()">×</button>
     <h2>Report a Counterfeit Issue</h2>
     <p>If you would like to inform BFDO about a suspected counterfeit issue or need anticounterfeiting support, please complete this form and click Send. You may submit anonymously, though this may limit our ability to follow up.</p>
-    <div class="contact-form">
-      <div class="form-field">
-        <input type="text" placeholder="Name" />
-        <span class="req">*</span>
-      </div>
-      <div class="form-field">
-        <input type="text" placeholder="Company" />
-        <span class="req">*</span>
-      </div>
-      <div class="form-field">
-        <input type="email" placeholder="Email" />
-        <span class="req">*</span>
-      </div>
-      <div class="form-field">
-        <textarea placeholder="Message"></textarea>
-      </div>
-      <div class="form-submit">
-        <button class="btn-primary" style="width:100%">Send</button>
-      </div>
-    </div>
+    <div class="contact-form" id="modal-form">
+          <div class="form-field">
+            <input type="text" id="m-name" placeholder="Name" />
+            <span class="req">*</span>
+            <div class="form-error" id="m-name-err">Please enter your name</div>
+          </div>
+          <div class="form-field">
+            <input type="text" id="m-company" placeholder="Company" />
+            <span class="req">*</span>
+            <div class="form-error" id="m-company-err">Please enter your company</div>
+          </div>
+          <div class="form-field">
+            <input type="email" id="m-email" placeholder="Email" />
+            <span class="req">*</span>
+            <div class="form-error" id="m-email-err">Please enter a valid email</div>
+          </div>
+          <div class="form-field">
+            <textarea id="m-message" placeholder="Message"></textarea>
+          </div>
+          <div class="form-submit">
+            <button class="btn-primary" style="width:100%" onclick="submitForm('modal-form', ['m-name','m-company','m-email'])">Send</button>
+          </div>
+        </div>
   </div>
+</div>
+
+<!-- TOASTER -->
+<div class="toaster" id="toaster">
+  <div class="toaster-icon">
+    <svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg>
+  </div>
+  <span id="toaster-msg">Your message has been sent successfully.</span>
 </div>
 
 <!-- COOKIE BANNER -->
@@ -1070,7 +1180,127 @@
   </div>
 </div>
 
+<!-- TOASTER -->
+<div class="toaster" id="toaster">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+  Message sent — we'll be in touch soon.
+</div>
+
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  // ── FORM VALIDATION & TOASTER ──
+  function showToaster() {
+    const t = document.getElementById('toaster');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 4000);
+  }
+
+  function validateField(id) {
+    const el = document.getElementById(id);
+    const err = document.getElementById(id + '-err');
+    if (!el) return true;
+    let valid = true;
+    if (el.type === 'email') {
+      valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el.value.trim());
+    } else {
+      valid = el.value.trim().length > 0;
+    }
+    el.classList.toggle('invalid', !valid);
+    if (err) err.classList.toggle('show', !valid);
+    return valid;
+  }
+
+  function submitForm(formId, requiredIds) {
+    let allValid = true;
+    requiredIds.forEach(id => {
+      if (!validateField(id)) allValid = false;
+    });
+    if (!allValid) return;
+
+    // Clear fields
+    const form = document.getElementById(formId);
+    form.querySelectorAll('input, textarea').forEach(el => {
+      el.value = '';
+      el.classList.remove('invalid');
+    });
+    form.querySelectorAll('.form-error').forEach(e => e.classList.remove('show'));
+
+    // Close modal if open
+    closeModal();
+
+    // Show toaster
+    showToaster();
+  }
+
+  // Live clear errors on input
+  document.addEventListener('input', e => {
+    if (e.target.matches('input, textarea')) {
+      e.target.classList.remove('invalid');
+      const err = document.getElementById(e.target.id + '-err');
+      if (err) err.classList.remove('show');
+    }
+  });
+
+  // ── FORM VALIDATION & TOASTER ──
+  function showToast(msg) {
+    const t = document.getElementById('toaster');
+    document.getElementById('toaster-msg').textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 4000);
+  }
+
+  function validateField(id) {
+    const input = document.getElementById(id);
+    if (!input) return true;
+    const field = input.closest('.form-field');
+    const isEmail = input.type === 'email';
+    const value = input.value.trim();
+    let valid = value.length > 0;
+    if (isEmail && valid) valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+    field.classList.toggle('invalid', !valid);
+    field.classList.toggle('valid', valid);
+    return valid;
+  }
+
+  function submitForm(formId, fieldIds) {
+    let allValid = true;
+    fieldIds.forEach(id => {
+      if (!validateField(id)) allValid = false;
+    });
+    if (!allValid) return;
+
+    // Clear fields
+    fieldIds.forEach(id => {
+      const input = document.getElementById(id);
+      if (input) {
+        input.value = '';
+        input.closest('.form-field').classList.remove('valid', 'invalid');
+      }
+    });
+    // Clear message textarea
+    const msgId = formId === 'modal-form' ? 'm-message' : 'c-message';
+    const msg = document.getElementById(msgId);
+    if (msg) msg.value = '';
+
+    // Close modal if it was the modal form
+    if (formId === 'modal-form') closeModal();
+
+    showToast('Your message has been sent successfully.');
+  }
+
+  // Live validation on blur
+  document.addEventListener('DOMContentLoaded', () => {
+    ['c-name','c-company','c-email','m-name','m-company','m-email'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('blur', () => validateField(id));
+        el.addEventListener('input', () => {
+          const field = el.closest('.form-field');
+          if (field.classList.contains('invalid')) validateField(id);
+        });
+      }
+    });
+  });
+
   // Accordion
   function toggleAcc(trigger) {
     const body = trigger.nextElementSibling;
