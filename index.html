@@ -1113,9 +1113,10 @@
           </div>
           <div class="form-field">
             <textarea id="c-message" placeholder="Message"></textarea>
+            <div class="form-error" id="c-message-err">Please enter your message</div>
           </div>
           <div class="form-submit">
-            <button class="btn-primary" onclick="submitForm('contact-form', ['c-name','c-company','c-email'])">Send</button>
+            <button class="btn-primary" onclick="submitForm('contact-form', ['c-name','c-company','c-email','c-message'])">Send</button>
           </div>
         </div>
       </div>
@@ -1155,9 +1156,10 @@
           </div>
           <div class="form-field">
             <textarea id="m-message" placeholder="Message"></textarea>
+            <div class="form-error" id="m-message-err">Please enter your message</div>
           </div>
           <div class="form-submit">
-            <button class="btn-primary" style="width:100%" onclick="submitForm('modal-form', ['m-name','m-company','m-email'])">Send</button>
+            <button class="btn-primary" style="width:100%" onclick="submitForm('modal-form', ['m-name','m-company','m-email','m-message'])">Send</button>
           </div>
         </div>
   </div>
@@ -1289,7 +1291,7 @@
 
   // Live validation on blur
   document.addEventListener('DOMContentLoaded', () => {
-    ['c-name','c-company','c-email','m-name','m-company','m-email'].forEach(id => {
+    ['c-name','c-company','c-email','c-message','m-name','m-company','m-email','m-message'].forEach(id => {
       const el = document.getElementById(id);
       if (el) {
         el.addEventListener('blur', () => validateField(id));
